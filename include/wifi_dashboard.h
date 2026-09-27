@@ -58,6 +58,16 @@ private:
   void handleAPIControl();
   void handleNotFound();
 
+  // Advanced API handlers
+  void handleAPIAlerts();
+  void handleAPISchedules();
+  void handleAPIAuth();
+  void handleAPIExport();
+  void handleAPIEncryption();
+  void handleAPIOTA();
+  void handleAPICloud();
+  void handleAPIDatabase();
+
   // HTML/CSS/JS generation
   std::string generateHTML() const;
   std::string generateCSS() const;

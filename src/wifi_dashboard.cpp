@@ -4,6 +4,13 @@
 #include "audit_statistics.h"
 #include "audit_filter.h"
 #include "system_settings.h"
+#include "alerts_system.h"
+#include "scheduled_audits.h"
+#include "auth_system.h"
+#include "data_encryption.h"
+#include "delta_ota.h"
+#include "cloud_sync.h"
+#include "sqlite_db.h"
 #include <WiFi.h>
 
 bool WiFiDashboard::setLanguage(const std::string& lang) {
@@ -47,6 +54,17 @@ bool WiFiDashboard::begin(uint16_t port) {
   server->on("/api/stats", std::bind(&WiFiDashboard::handleAPIStats, this));
   server->on("/api/audits", std::bind(&WiFiDashboard::handleAPIAudits, this));
   server->on("/api/control", std::bind(&WiFiDashboard::handleAPIControl, this));
+
+  // Advanced API routes
+  server->on("/api/alerts", std::bind(&WiFiDashboard::handleAPIAlerts, this));
+  server->on("/api/schedules", std::bind(&WiFiDashboard::handleAPISchedules, this));
+  server->on("/api/auth", std::bind(&WiFiDashboard::handleAPIAuth, this));
+  server->on("/api/export", std::bind(&WiFiDashboard::handleAPIExport, this));
+  server->on("/api/encryption", std::bind(&WiFiDashboard::handleAPIEncryption, this));
+  server->on("/api/ota", std::bind(&WiFiDashboard::handleAPIOTA, this));
+  server->on("/api/cloud", std::bind(&WiFiDashboard::handleAPICloud, this));
+  server->on("/api/database", std::bind(&WiFiDashboard::handleAPIDatabase, this));
+
   server->onNotFound(std::bind(&WiFiDashboard::handleNotFound, this));
 
   server->begin();
@@ -524,4 +542,141 @@ std::string WiFiDashboard::generateHTML() const {
 </body>
 </html>
 )HTML";
+}
+
+// Advanced API Handlers
+
+void WiFiDashboard::handleAPIAlerts() {
+  auto& alerts = AlertsSystem::getInstance();
+  auto stats = alerts.getStats();
+  auto recentAlerts = alerts.getRecentAlerts(10);
+
+  String json = "{\"stats\":{\"total\":" + String(stats.totalAlerts) +
+    ",\"unacknowledged\":" + String(stats.unacknowledgedCount) +
+    ",\"critical\":" + String(stats.criticalCount) +
+    ",\"warnings\":" + String(stats.warningCount) + "},\"alerts\":[";
+
+  for (size_t i = 0; i < recentAlerts.size(); i++) {
+    if (i > 0) json += ",";
+    json += "{\"type\":" + String(recentAlerts[i].type) +
+      ",\"level\":" + String(recentAlerts[i].level) +
+      ",\"message\":\"" + String(recentAlerts[i].message.c_str()) +
+      "\",\"timestamp\":" + String(recentAlerts[i].timestamp) + "}";
+  }
+
+  json += "]}";
+  server->send(200, "application/json", json);
+}
+
+void WiFiDashboard::handleAPISchedules() {
+  auto& scheduler = ScheduledAudits::getInstance();
+  auto audits = scheduler.getScheduledAudits();
+
+  String json = "{\"total\":" + String(scheduler.getTotalCount()) +
+    ",\"enabled\":" + String(scheduler.getEnabledCount()) +
+    ",\"nextRun\":" + String(scheduler.getNextRunTime()) + ",\"audits\":[";
+
+  for (size_t i = 0; i < audits.size() && i < 10; i++) {
+    if (i > 0) json += ",";
+    json += "{\"id\":\"" + String(audits[i].id.c_str()) +
+      "\",\"name\":\"" + String(audits[i].name.c_str()) +
+      "\",\"type\":\"" + String(audits[i].auditType.c_str()) +
+      "\",\"recurrence\":" + String(audits[i].recurrence) +
+      ",\"enabled\":" + String(audits[i].enabled ? "true" : "false") + "}";
+  }
+
+  json += "]}";
+  server->send(200, "application/json", json);
+}
+
+void WiFiDashboard::handleAPIAuth() {
+  auto& auth = AuthSystem::getInstance();
+
+  if (server->method() == HTTP_POST) {
+    String action = server->arg("action");
+
+    if (action == "generate_key") {
+      String desc = server->arg("description");
+      uint8_t role = server->arg("role").toInt();
+      std::string key = auth.generateAPIKey(desc.c_str(), (AuthSystem::UserRole)role);
+      server->send(200, "application/json", "{\"key\":\"" + String(key.c_str()) + "\"}");
+    } else {
+      server->send(400, "application/json", "{\"error\":\"Invalid action\"}");
+    }
+  } else {
+    auto keys = auth.listAPIKeys();
+    String json = "{\"keys\":[";
+    for (size_t i = 0; i < keys.size(); i++) {
+      if (i > 0) json += ",";
+      json += "{\"key\":\"" + String(keys[i].key.c_str()) +
+        "\",\"description\":\"" + String(keys[i].description.c_str()) +
+        "\",\"role\":" + String(keys[i].role) + "}";
+    }
+    json += "]}";
+    server->send(200, "application/json", json);
+  }
+}
+
+void WiFiDashboard::handleAPIExport() {
+  String format = server->arg("format");
+
+  if (format == "csv") {
+    std::string csv = exportAuditsToCSV();
+    server->send(200, "text/csv", csv.c_str());
+  } else if (format == "json") {
+    std::string json = exportAuditsToJSON();
+    server->send(200, "application/json", json.c_str());
+  } else {
+    server->send(400, "application/json", "{\"error\":\"Invalid format\"}");
+  }
+}
+
+void WiFiDashboard::handleAPIEncryption() {
+  auto& encryption = DataEncryption::getInstance();
+
+  if (encryption.isReady()) {
+    server->send(200, "application/json", "{\"status\":\"ready\",\"cipher\":\"AES-256-GCM\"}");
+  } else {
+    server->send(200, "application/json", "{\"status\":\"initializing\"}");
+  }
+}
+
+void WiFiDashboard::handleAPIOTA() {
+  auto& deltaOTA = DeltaOTA::getInstance();
+
+  char json[256];
+  snprintf(json, sizeof(json),
+    "{\"state\":%u,\"progress\":%u,\"deltaSize\":%u,\"bytesSaved\":%u}",
+    deltaOTA.getState(), deltaOTA.getProgress(),
+    deltaOTA.getDeltaSize(), deltaOTA.getBytesSaved());
+
+  server->send(200, "application/json", json);
+}
+
+void WiFiDashboard::handleAPICloud() {
+  auto& cloudSync = CloudSync::getInstance();
+
+  char json[256];
+  snprintf(json, sizeof(json),
+    "{\"connected\":%s,\"status\":%u,\"lastSync\":%u,\"usage\":%llu}",
+    cloudSync.isConnected() ? "true" : "false",
+    cloudSync.getStatus(), cloudSync.getLastSyncTime(),
+    cloudSync.getCloudUsage());
+
+  server->send(200, "application/json", json);
+}
+
+void WiFiDashboard::handleAPIDatabase() {
+  auto& db = SQLiteDB::getInstance();
+
+  if (db.isInitialized()) {
+    uint32_t auditCount = db.getAuditCount();
+    char json[256];
+    snprintf(json, sizeof(json),
+      "{\"initialized\":true,\"auditCount\":%u,\"size\":%u}",
+      auditCount, db.getSize());
+    server->send(200, "application/json", json);
+  } else {
+    server->send(200, "application/json", "{\"initialized\":false}");
+  }
 }
