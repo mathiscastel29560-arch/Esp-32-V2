@@ -2,8 +2,37 @@
 #include "debug_logger.h"
 #include "audit_history.h"
 #include "audit_statistics.h"
+#include "audit_filter.h"
 #include "system_settings.h"
 #include <WiFi.h>
+
+bool WiFiDashboard::setLanguage(const std::string& lang) {
+  if (lang == "en" || lang == "fr" || lang == "es") {
+    currentLanguage = lang;
+    DebugLogger::printf("[WiFiDashboard] Language set to: %s\n", lang.c_str());
+    return true;
+  }
+  return false;
+}
+
+void WiFiDashboard::setDarkMode(bool enabled) {
+  darkMode = enabled;
+  DebugLogger::printf("[WiFiDashboard] Dark mode: %s\n", enabled ? "ON" : "OFF");
+}
+
+std::string WiFiDashboard::exportAuditsToCSV() const {
+  auto& filter = AuditFilter::getInstance();
+  auto& history = AuditHistory::getInstance();
+  auto records = history.getAllRecords();
+  return filter.exportToCSV(records);
+}
+
+std::string WiFiDashboard::exportAuditsToJSON() const {
+  auto& filter = AuditFilter::getInstance();
+  auto& history = AuditHistory::getInstance();
+  auto records = history.getAllRecords();
+  return filter.exportToJSON(records);
+}
 
 bool WiFiDashboard::begin(uint16_t port) {
   if (running) return true;
