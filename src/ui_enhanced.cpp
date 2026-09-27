@@ -28,73 +28,92 @@ void UIEnhanced::displayAnimatedBootScreen() {
 }
 
 void UIEnhanced::displayTigerAnimation() {
-  // Animated tiger frames - progressive appearance
+  // Terrifying Tiger Animation - Progressive frames with RF/BLE elements
 
-  // Frame 1: Eyes open (looking right)
+  // Frame 1: Antennae and RF waves appearing
   Serial.println("\n");
   Serial.println("  ╔════════════════════════════════════════╗");
+  Serial.println("  ║  |    |    RF HUNTING MODE    |    |  ║");
+  Serial.println("  ║  ≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈  ║");
   Serial.println("  ║                                        ║");
-  Serial.println("  ║          Tiger Audit Platform          ║");
+  Serial.println("  ║    🐯 TIGER PROWLING NETWORKS 🐯      ║");
   Serial.println("  ║                                        ║");
-  delay(200);
+  delay(250);
 
-  // Frame 2: Head emerging
-  Serial.println("  ║        ╱────────╲                      ║");
-  Serial.println("  ║       │  ◉  ◉  │  ← Eyes on          ║");
-  Serial.println("  ║        ╲────────╱                      ║");
-  Serial.println("  ║                                        ║");
-  delay(300);
-
-  // Frame 3: Face appears (mouth open)
+  // Frame 2: Tiger eyes glow with RF waves
   Serial.clear();
   Serial.println("\n");
   Serial.println("  ╔════════════════════════════════════════╗");
+  Serial.println("  ║  | ≈≈≈ |  RF SCANNING ACTIVE  | ≈≈≈ |  ║");
+  Serial.println("  ║  ≈  ~~~  ≈  NETWORK TARGETING  ≈  ~~~ ≈  ║");
   Serial.println("  ║                                        ║");
-  Serial.println("  ║          🐯 TIGER ROARING 🐯           ║");
+  Serial.println("  ║       ╭─────────────────────╮          ║");
+  Serial.println("  ║       │  ●  ●  EYES GLOW   │          ║");
+  Serial.println("  ║       │ Hunting WiFi/BLE   │          ║");
+  Serial.println("  ║       ╰─────────────────────╯          ║");
   Serial.println("  ║                                        ║");
-  Serial.println("  ║        ╱─────────────╲                 ║");
-  Serial.println("  ║       │ ◉  ∩  ∩  ◉  │  READY!         ║");
-  Serial.println("  ║       │ \\  ⌢  ⌢  /  │                 ║");
-  Serial.println("  ║        ╲─────────────╱                 ║");
-  Serial.println("  ║                                        ║");
-  delay(300);
+  delay(250);
 
-  // Frame 4: Whiskers and stripes
+  // Frame 3: Terrifying face with RF surround
   Serial.clear();
   Serial.println("\n");
   Serial.println("  ╔════════════════════════════════════════╗");
+  Serial.println("  ║≈≈≈| THREAT DETECTED - RF LOCKED |≈≈≈║");
+  Serial.println("  ║~~~  ~  BLE/WiFi INTERCEPTING  ~  ~~~║");
   Serial.println("  ║                                        ║");
-  Serial.println("  ║      ⚡ TIGER SECURITY FRAMEWORK ⚡    ║");
+  Serial.println("  ║     ╭────────●●────────╮              ║");
+  Serial.println("  ║     │  ●═══  vv  ═══● │  ROARING!    ║");
+  Serial.println("  ║     │ |█ FANGS READY █| │              ║");
+  Serial.println("  ║     ╰────────────────────╯              ║");
   Serial.println("  ║                                        ║");
-  Serial.println("  ║     ╭───⌬⌬⌬───────────⌬⌬⌬───╮        ║");
-  Serial.println("  ║     │ ◉◉      /  \\      ◉◉ │        ║");
-  Serial.println("  ║     │          ∧∧∧∧            │        ║");
-  Serial.println("  ║     ╰───⌬⌬⌬───────────⌬⌬⌬───╯        ║");
-  Serial.println("  ║                                        ║");
-  delay(300);
+  delay(250);
 
-  // Frame 5: Full tiger with power
+  // Frame 4: Full attack mode with antenna arrays
   Serial.clear();
   Serial.println("\n");
   Serial.println("  ╔════════════════════════════════════════╗");
+  Serial.println("  ║  | ≈≈≈ | | SIGNAL JAMMED | | ≈≈≈ |   ║");
+  Serial.println("  ║  ≈~~~≈~~~≈  RF DOMINANCE  ≈~~~≈~~~≈   ║");
+  Serial.println("  ║  ⚡ ⚡ ⚡ ATTACK ACTIVATED ⚡ ⚡ ⚡   ║");
   Serial.println("  ║                                        ║");
-  Serial.println("  ║      🐯 TIGER AUDIT PLATFORM 🐯        ║");
+  Serial.println("  ║  ╭──⚡───●●────⚡──╮   433/915/2400   ║");
+  Serial.println("  ║  │ ●╱════^^^════╲● │    MHz ACTIVE    ║");
+  Serial.println("  ║  │ │STRIPES│SCAN│ │    BLE LOCK-ON   ║");
+  Serial.println("  ║  ╰──⚡────────────⚡──╯                ║");
   Serial.println("  ║                                        ║");
-  Serial.println("  ║     ╭─⚡⚡ ◉◉ ⚡⚡─────────╮        ║");
-  Serial.println("  ║     │  │◉◉─╱─╲─◉◉│  ⚡       │        ║");
-  Serial.println("  ║     │  │   ∨∨∨∨   │  ROARING │        ║");
-  Serial.println("  ║     ╰─⚡⚡────────⚡⚡─────╯        ║");
+  delay(250);
+
+  // Frame 5: Maximum power - RF network infiltration
+  Serial.clear();
+  Serial.println("\n");
+  Serial.println("  ╔════════════════════════════════════════╗");
+  Serial.println("  ║ | |||  ≈≈≈≈≈ TIGER IN CONTROL ≈≈≈≈≈ | ║");
+  Serial.println("  ║ ≈~~~≈~~~≈~~~  ALL NETWORKS OWNED  ~~~≈ ║");
+  Serial.println("  ║ ⚡⚡⚡⚡⚡ HUNT COMMENCING ⚡⚡⚡⚡⚡ ║");
   Serial.println("  ║                                        ║");
-  Serial.println("  ║    Professional Security Penetration    ║");
-  Serial.println("  ║         ESP32-S3 Advanced Tools         ║");
+  Serial.println("  ║   🐯  ╭─⚡⚡⚡●●●⚡⚡⚡─╮  🐯            ║");
+  Serial.println("  ║       │ ╱╲MERCILESS╱╲ │               ║");
+  Serial.println("  ║       │├──█████████──┤│ RF PREDATOR    ║");
+  Serial.println("  ║       │└─ HUNTING ─┘│ BLE/WiFi TRAPPED║");
+  Serial.println("  ║       ╰─────────────────╯               ║");
+  Serial.println("  ║                                        ║");
+  delay(250);
+
+  // Frame 6: Final - System Online and Dangerous
+  Serial.clear();
+  Serial.println("\n");
+  Serial.println("  ╔════════════════════════════════════════╗");
+  Serial.println("  ║ |||  ≈≈≈≈ TIGER AUDIT ACTIVE ≈≈≈≈ ||| ║");
+  Serial.println("  ║ ⚡⚡⚡ RF DOMINANCE LOCKED IN ⚡⚡⚡ ║");
+  Serial.println("  ║ ●●● ALL THREATS NEUTRALIZED ●●● ║");
+  Serial.println("  ║                                        ║");
+  Serial.println("  ║  NETWORKS SCANNING + DEVICES MAPPING  ║");
+  Serial.println("  ║  RF MONITORING + SECURITY TESTING     ║");
+  Serial.println("  ║  THREAT DETECTION + PROTOCOLS ARMED   ║");
+  Serial.println("  ║                                        ║");
+  Serial.println("  ║  🐯  MERCILESS. UNSTOPPABLE. READY.  🐯 ║");
   Serial.println("  ║                                        ║");
   delay(300);
-
-  // Frame 6: Loading indicator
-  Serial.println("  ╠════════════════════════════════════════╣");
-  Serial.println("  ║  ⚡ ◉◉ ⚡ System Initialization ⚡ ◉◉ ⚡ ║");
-  Serial.println("  ╚════════════════════════════════════════╝");
-  delay(200);
 }
 
 void UIEnhanced::displaySystemLoadingBar() {
