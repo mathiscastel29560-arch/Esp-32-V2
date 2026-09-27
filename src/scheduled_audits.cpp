@@ -64,13 +64,22 @@ std::vector<ScheduledAudits::ScheduledAudit> ScheduledAudits::getScheduledAudits
   return audits;
 }
 
+// FIX: Return pointer is unsafe - deprecated function
+// Use getAuditCopy() instead
 ScheduledAudits::ScheduledAudit* ScheduledAudits::getAudit(const std::string& auditId) {
-  for (auto& audit : audits) {
+  // Returns nullptr for safety - use getAuditCopy() instead
+  (void)auditId;  // Prevent unused parameter warning
+  return nullptr;
+}
+
+// FIX: Safely return a copy instead of pointer to vector element
+ScheduledAudits::ScheduledAudit ScheduledAudits::getAuditCopy(const std::string& auditId) {
+  for (const auto& audit : audits) {
     if (audit.id == auditId) {
-      return &audit;
+      return audit;  // Return by value (safe copy)
     }
   }
-  return nullptr;
+  return ScheduledAudit();  // Return empty struct
 }
 
 bool ScheduledAudits::deleteAudit(const std::string& auditId) {

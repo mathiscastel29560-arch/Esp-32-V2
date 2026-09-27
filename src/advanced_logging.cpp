@@ -47,31 +47,52 @@ DataPoint* DataLogger::getDataPoint(uint16_t index) {
 }
 
 bool DataLogger::exportToCSV(char* output, uint16_t maxLen) {
+  if (!output || maxLen < 64) return false;
+
   uint16_t written = 0;
-  written += snprintf(output + written, maxLen - written,
+  int ret = snprintf(output + written, maxLen - written,
     "timestamp,metric,value,unit\n");
+  if (ret < 0 || ret >= (int)(maxLen - written)) return false;
+  written += ret;
 
   for (auto* dp : dataPoints) {
-    written += snprintf(output + written, maxLen - written,
+    if (written >= maxLen - 100) break;
+    ret = snprintf(output + written, maxLen - written,
       "%u,%s,%.2f,%s\n", dp->timestamp, dp->metric, dp->value, dp->unit);
+    if (ret < 0 || ret >= (int)(maxLen - written)) break;
+    written += ret;
   }
 
+  output[written] = '\0';
   return written < maxLen;
 }
 
 bool DataLogger::exportToJSON(char* output, uint16_t maxLen) {
+  if (!output || maxLen < 64) return false;
+
   uint16_t written = 0;
-  written += snprintf(output + written, maxLen - written, "[");
+  int ret = snprintf(output + written, maxLen - written, "[");
+  if (ret < 0 || ret >= (int)(maxLen - written)) return false;
+  written += ret;
 
   for (uint16_t i = 0; i < dataPoints.size(); i++) {
-    if (i > 0) written += snprintf(output + written, maxLen - written, ",");
+    if (written >= maxLen - 150) break;
+    if (i > 0) {
+      ret = snprintf(output + written, maxLen - written, ",");
+      if (ret < 0 || ret >= (int)(maxLen - written)) break;
+      written += ret;
+    }
     DataPoint* dp = dataPoints[i];
-    written += snprintf(output + written, maxLen - written,
+    ret = snprintf(output + written, maxLen - written,
       "{\"ts\":%u,\"m\":\"%s\",\"v\":%.2f,\"u\":\"%s\"}",
       dp->timestamp, dp->metric, dp->value, dp->unit);
+    if (ret < 0 || ret >= (int)(maxLen - written)) break;
+    written += ret;
   }
 
-  written += snprintf(output + written, maxLen - written, "]");
+  ret = snprintf(output + written, maxLen - written, "]");
+  if (ret >= 0) written += ret;
+  output[written < maxLen ? written : maxLen - 1] = '\0';
   return written < maxLen;
 }
 
@@ -247,14 +268,20 @@ void RingBuffer::printAll() {
 }
 
 void RingBuffer::exportToBuffer(char* output, uint16_t maxLen) {
+  if (!output || maxLen < 64) return;
+
   uint16_t written = 0;
   uint16_t pos = readPos;
 
   while (pos != writePos && written < maxLen - 100) {
-    written += snprintf(output + written, maxLen - written,
+    int ret = snprintf(output + written, maxLen - written,
       "[%u] %s\n", buffer[pos].timestamp, buffer[pos].message);
+    if (ret < 0 || ret >= (int)(maxLen - written - 1)) break;
+    written += ret;
     pos = (pos + 1) % maxSize;
   }
+
+  output[written < maxLen ? written : maxLen - 1] = '\0';
 }
 
 // ============= LOG AGGREGATOR IMPLEMENTATION =============
@@ -283,17 +310,34 @@ void LogAggregator::update() {
 }
 
 void LogAggregator::generateMasterReport(char* output, uint16_t maxLen) {
+  if (!output || maxLen < 128) return;
+
   uint16_t written = 0;
-  written += snprintf(output + written, maxLen - written,
-    "LOG AGGREGATOR REPORT\n");
-  written += snprintf(output + written, maxLen - written,
-    "Data Logging: %s\n", dataLoggingEnabled ? "ON" : "OFF");
-  written += snprintf(output + written, maxLen - written,
-    "File Logging: %s\n", fileLoggingEnabled ? "ON" : "OFF");
-  written += snprintf(output + written, maxLen - written,
-    "Cloud Logging: %s\n", cloudLoggingEnabled ? "ON" : "OFF");
-  written += snprintf(output + written, maxLen - written,
-    "Data Points: %u\n", DataLogger::getInstance().getDataPointCount());
+  int ret;
+
+  ret = snprintf(output + written, maxLen - written, "LOG AGGREGATOR REPORT\n");
+  if (ret < 0 || ret >= (int)(maxLen - written)) return;
+  written += ret;
+
+  ret = snprintf(output + written, maxLen - written, "Data Logging: %s\n",
+    dataLoggingEnabled ? "ON" : "OFF");
+  if (ret < 0 || ret >= (int)(maxLen - written)) return;
+  written += ret;
+
+  ret = snprintf(output + written, maxLen - written, "File Logging: %s\n",
+    fileLoggingEnabled ? "ON" : "OFF");
+  if (ret < 0 || ret >= (int)(maxLen - written)) return;
+  written += ret;
+
+  ret = snprintf(output + written, maxLen - written, "Cloud Logging: %s\n",
+    cloudLoggingEnabled ? "ON" : "OFF");
+  if (ret < 0 || ret >= (int)(maxLen - written)) return;
+  written += ret;
+
+  ret = snprintf(output + written, maxLen - written, "Data Points: %u\n",
+    DataLogger::getInstance().getDataPointCount());
+  if (ret >= 0) written += ret;
+  output[written < maxLen ? written : maxLen - 1] = '\0';
 }
 
 void LogAggregator::printLogStatus() {

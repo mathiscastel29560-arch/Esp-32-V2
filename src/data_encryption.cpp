@@ -173,13 +173,15 @@ bool DataEncryption::deriveMasterKey() {
     // Generate new key
     masterKey = generateKey();
 
-    // Store as hex
+    // Store as hex (bounded string operations)
     keyHex[0] = '\0';
+    size_t hexLen = 0;
     for (uint8_t byte : masterKey) {
-      char hex[3];
-      snprintf(hex, sizeof(hex), "%02x", byte);
-      strcat(keyHex, hex);
+      if (hexLen >= sizeof(keyHex) - 3) break;
+      int ret = snprintf(keyHex + hexLen, sizeof(keyHex) - hexLen, "%02x", byte);
+      if (ret > 0) hexLen += ret;
     }
+    keyHex[hexLen] = '\0';
 
     nvs_set_str(handle, "master_key", keyHex);
     nvs_commit(handle);
@@ -189,8 +191,10 @@ bool DataEncryption::deriveMasterKey() {
     masterKey.clear();
     for (size_t i = 0; i < strlen(keyHex); i += 2) {
       uint8_t byte = 0;
-      sscanf(keyHex + i, "%02x", (unsigned int*)&byte);
-      masterKey.push_back(byte);
+      int result = sscanf(keyHex + i, "%02x", (unsigned int*)&byte);
+      if (result == 1) {
+        masterKey.push_back(byte);
+      }
     }
     DebugLogger::println("[Encryption] Loaded existing master key");
   } else {

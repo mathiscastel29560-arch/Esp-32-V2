@@ -80,22 +80,60 @@ std::vector<std::vector<std::string>> SQLiteDB::query(const std::string& sql) {
 bool SQLiteDB::insertAudit(uint32_t timestamp, const std::string& type,
                            uint8_t devicesFound, int8_t maxRSSI,
                            const std::string& status) {
-  char sql[256];
-  snprintf(sql, sizeof(sql),
-    "INSERT INTO audits (timestamp, type, devices_found, max_rssi, status) "
-    "VALUES (%u, '%s', %u, %d, '%s');",
-    timestamp, type.c_str(), devicesFound, maxRSSI, status.c_str());
+  if (!initialized) return false;
 
-  return execute(sql);
+  const char* sql = "INSERT INTO audits (timestamp, type, devices_found, max_rssi, status) "
+                    "VALUES (?, ?, ?, ?, ?);";
+  sqlite3_stmt* stmt;
+
+  int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
+  if (rc != SQLITE_OK) {
+    DebugLogger::printf("[SQLite] Prepare error: %s\n", sqlite3_errmsg(db));
+    return false;
+  }
+
+  sqlite3_bind_int(stmt, 1, timestamp);
+  sqlite3_bind_text(stmt, 2, type.c_str(), -1, SQLITE_STATIC);
+  sqlite3_bind_int(stmt, 3, devicesFound);
+  sqlite3_bind_int(stmt, 4, maxRSSI);
+  sqlite3_bind_text(stmt, 5, status.c_str(), -1, SQLITE_STATIC);
+
+  rc = sqlite3_step(stmt);
+  sqlite3_finalize(stmt);
+
+  return rc == SQLITE_DONE;
 }
 
 std::vector<std::vector<std::string>> SQLiteDB::getAudits(uint32_t limit) {
-  char sql[128];
-  snprintf(sql, sizeof(sql),
-    "SELECT timestamp, type, devices_found, max_rssi, status "
-    "FROM audits ORDER BY timestamp DESC LIMIT %u;", limit);
+  std::vector<std::vector<std::string>> results;
+  if (!initialized) return results;
 
-  return query(sql);
+  const char* sql = "SELECT timestamp, type, devices_found, max_rssi, status "
+                    "FROM audits ORDER BY timestamp DESC LIMIT ?;";
+  sqlite3_stmt* stmt;
+
+  int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
+  if (rc != SQLITE_OK) {
+    DebugLogger::printf("[SQLite] Query prepare error: %s\n", sqlite3_errmsg(db));
+    return results;
+  }
+
+  sqlite3_bind_int(stmt, 1, limit);
+
+  while (sqlite3_step(stmt) == SQLITE_ROW) {
+    std::vector<std::string> row;
+    int cols = sqlite3_column_count(stmt);
+
+    for (int i = 0; i < cols; i++) {
+      const char* val = (const char*)sqlite3_column_text(stmt, i);
+      row.push_back(val ? val : "");
+    }
+
+    results.push_back(row);
+  }
+
+  sqlite3_finalize(stmt);
+  return results;
 }
 
 uint32_t SQLiteDB::getAuditCount() {
@@ -105,19 +143,30 @@ uint32_t SQLiteDB::getAuditCount() {
 }
 
 bool SQLiteDB::deleteOldRecords(uint32_t ageSeconds) {
+  if (!initialized) return false;
+
   uint32_t cutoffTime = time(nullptr) - ageSeconds;
+  const char* sql = "DELETE FROM audits WHERE timestamp < ?;";
+  sqlite3_stmt* stmt;
 
-  char sql[256];
-  snprintf(sql, sizeof(sql),
-    "DELETE FROM audits WHERE timestamp < %u;", cutoffTime);
-
-  bool success = execute(sql);
-  if (success) {
-    DebugLogger::printf("[SQLite] Deleted records older than %u seconds\n", ageSeconds);
-    updateSize();
+  int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
+  if (rc != SQLITE_OK) {
+    DebugLogger::printf("[SQLite] Prepare error: %s\n", sqlite3_errmsg(db));
+    return false;
   }
 
-  return success;
+  sqlite3_bind_int(stmt, 1, cutoffTime);
+
+  rc = sqlite3_step(stmt);
+  sqlite3_finalize(stmt);
+
+  if (rc == SQLITE_DONE) {
+    DebugLogger::printf("[SQLite] Deleted records older than %u seconds\n", ageSeconds);
+    updateSize();
+    return true;
+  }
+
+  return false;
 }
 
 bool SQLiteDB::backup(const char* backupPath) {

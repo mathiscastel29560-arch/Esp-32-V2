@@ -113,14 +113,16 @@ void AttackOrchestrator::update() {
 
   // Update active attacks
   for (auto* context : activeAttacks) {
-    if (context->attack && context->attack->isActive()) {
-      context->attack->update();
+    if (!context) continue;  // FIX: Null check on context
+    if (!context->attack) continue;  // FIX: Null check on attack
+    if (!context->attack->isActive()) continue;
 
-      // Check timeout
-      if (context->maxDuration > 0) {
-        if (now - context->startTime > context->maxDuration) {
-          stopAttack(context->attack);
-        }
+    context->attack->update();
+
+    // Check timeout
+    if (context->maxDuration > 0) {
+      if (now - context->startTime > context->maxDuration) {
+        stopAttack(context->attack);
       }
     }
   }
@@ -135,10 +137,11 @@ void AttackOrchestrator::update() {
 void AttackOrchestrator::stop() {
   // Stop all active attacks
   for (auto* context : activeAttacks) {
-    if (context->attack) {
-      context->attack->stop();
-      releaseAttackResources(context->attack);
-    }
+    if (!context) continue;  // FIX: Null check
+    if (!context->attack) continue;  // FIX: Null check
+
+    context->attack->stop();
+    releaseAttackResources(context->attack);
   }
 
   Logger::getInstance().info("Orchestrator", "Stopped");
