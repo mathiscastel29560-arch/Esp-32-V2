@@ -2,6 +2,10 @@
 #include "config.h"
 #include "menu.h"
 #include "drivers.h"
+#include "initialization_manager.h"
+#include "async_logger.h"
+#include "non_blocking_timer.h"
+#include "resource_cache.h"
 
 // ============= GLOBAL OBJECTS =============
 
@@ -11,135 +15,57 @@ Menu gMenu;
 
 void setup() {
   Serial.begin(115200);
-  delay(1000);
 
-  Serial.println("\n\n=== ESP32-S3 V2 - Offensive Security Platform ===");
-  Serial.println("Version: " VERSION);
-  Serial.println("Build Date: " BUILD_DATE);
-  Serial.println("Hardware: " HARDWARE_REVISION);
-  Serial.println("========================================\n");
+  LOG_I("=== ESP32-S3 V2 - Offensive Security Platform ===");
+  LOG_I("Version: %s", VERSION);
+  LOG_I("Build Date: %s", BUILD_DATE);
+  LOG_I("Hardware: %s", HARDWARE_REVISION);
 
-  // Initialize display first
-  Serial.print("[INIT] Display...");
-  if (!Drivers::Display::begin()) {
-    Serial.println(" FAILED!");
-    Serial.println("[ERROR] Display initialization failed - system unstable!");
+  InitializationManager& initMgr = InitializationManager::getInstance();
+
+  initMgr.registerDriver("Display", []() { return Drivers::Display::begin(); }, true);
+  initMgr.registerDriver("GPIO", []() { return Drivers::GPIO::begin(); }, false);
+  initMgr.registerDriver("I2C", []() { return Drivers::I2C::begin(); }, false);
+  initMgr.registerDriver("RTC", []() { return Drivers::RTC::begin(); }, false);
+  initMgr.registerDriver("NFC", []() { return Drivers::NFC::begin(); }, false);
+  initMgr.registerDriver("RFID", []() { return Drivers::RFID::begin(); }, false);
+  initMgr.registerDriver("CC1101", []() { return Drivers::CC1101::begin(); }, false);
+  initMgr.registerDriver("NRF24", []() { return Drivers::NRF24::begin(); }, false);
+  initMgr.registerDriver("SX1262", []() { return Drivers::SX1262::begin(); }, false);
+  initMgr.registerDriver("GPS", []() { return Drivers::GPS::begin(); }, false);
+  initMgr.registerDriver("IR_RX", []() { return Drivers::IR::beginReceiver(); }, false);
+  initMgr.registerDriver("IR_TX", []() { return Drivers::IR::beginTransmitter(); }, false);
+  initMgr.registerDriver("Menu", []() { gMenu.begin(); return true; }, true);
+
+  if (!initMgr.initializeAll()) {
+    LOG_E("CRITICAL: Initialization failed!");
+    AsyncLogger::getInstance().flush();
     delay(2000);
-    ESP.restart();  // FIX: Attempt restart instead of hard freeze
-  }
-  Serial.println(" OK");
-
-  // Initialize GPIO (buttons, buzzer, battery)
-  Serial.print("[INIT] GPIO...");
-  if (!Drivers::GPIO::begin()) {
-    Serial.println(" WARNING - continuing anyway");
-  } else {
-    Serial.println(" OK");
+    ESP.restart();
   }
 
-  // Initialize I2C bus
-  Serial.print("[INIT] I2C Bus...");
-  if (!Drivers::I2C::begin()) {
-    Serial.println(" FAILED!");
-    Serial.println("[ERROR] I2C bus initialization failed - RTC/NFC may not work!");
-    // I2C not critical - continue with warning
-  } else {
-    Serial.println(" OK");
-  }
+  initMgr.printInitReport();
+  AsyncLogger::getInstance().flush();
 
-  // Initialize RTC
-  Serial.print("[INIT] RTC (DS3231)...");
-  if (!Drivers::RTC::begin()) {
-    Serial.println(" WARNING - clock not available");
-  } else {
-    Serial.println(" OK");
-  }
-
-  // Initialize NFC Reader
-  Serial.print("[INIT] NFC Reader (PN532)...");
-  if (!Drivers::NFC::begin()) {
-    Serial.println(" WARNING - NFC not available");
-  } else {
-    Serial.println(" OK");
-  }
-
-  // Initialize RFID Reader
-  Serial.print("[INIT] RFID Reader (MFRC522)...");
-  if (!Drivers::RFID::begin()) {
-    Serial.println(" WARNING - RFID not available");
-  } else {
-    Serial.println(" OK");
-  }
-
-  // Initialize CC1101 (433MHz)
-  Serial.print("[INIT] CC1101 (433MHz)...");
-  if (!Drivers::CC1101::begin()) {
-    Serial.println(" WARNING - CC1101 not available");
-  } else {
-    Serial.println(" OK");
-  }
-
-  // Initialize NRF24 (2.4GHz)
-  Serial.print("[INIT] NRF24 (2.4GHz)...");
-  if (!Drivers::NRF24::begin()) {
-    Serial.println(" WARNING - NRF24 not available");
-  } else {
-    Serial.println(" OK");
-  }
-
-  // Initialize SX1262 (868MHz LoRa)
-  Serial.print("[INIT] SX1262 (868MHz)...");
-  if (!Drivers::SX1262::begin()) {
-    Serial.println(" WARNING - SX1262 not available");
-  } else {
-    Serial.println(" OK");
-  }
-
-  // Initialize GPS
-  Serial.print("[INIT] GPS (NEO-6M)...");
-  if (!Drivers::GPS::begin()) {
-    Serial.println(" WARNING - GPS not available");
-  } else {
-    Serial.println(" OK");
-  }
-
-  // Initialize IR (Receiver + Transmitter)
-  Serial.print("[INIT] IR Receiver...");
-  if (!Drivers::IR::beginReceiver()) {
-    Serial.println(" WARNING - IR receiver not available");
-  } else {
-    Serial.println(" OK");
-  }
-
-  Serial.print("[INIT] IR Transmitter...");
-  if (!Drivers::IR::beginTransmitter()) {
-    Serial.println(" WARNING - IR transmitter not available");
-  } else {
-    Serial.println(" OK");
-  }
-
-  // Initialize Menu
-  Serial.print("[INIT] Menu System...");
-  gMenu.begin();
-  Serial.println(" OK");
-
-  Serial.println("\n=== INITIALIZATION COMPLETE ===\n");
+  LOG_I("=== SYSTEM READY ===");
+  AsyncLogger::getInstance().flush();
 }
 
 // ============= MAIN LOOP =============
 
 void loop() {
-  // Update menu display
+  TimerManager& timerMgr = TimerManager::getInstance();
+
   gMenu.update();
   gMenu.display();
 
-  // Check button inputs
-  for (int i = 0; i < 4; i++) {
-    // Will implement button polling
-  }
+  timerMgr.updateAll();
 
-  // Small delay to prevent watchdog trigger
-  delay(50);
+  static uint32_t lastFlush = 0;
+  if (millis() - lastFlush > 100) {
+    AsyncLogger::getInstance().flush();
+    lastFlush = millis();
+  }
 }
 
 // ============= DEBUG HELPERS =============
