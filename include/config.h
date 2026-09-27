@@ -7,10 +7,10 @@
 #define TFT_MOSI 11
 #define TFT_MISO 13
 #define TFT_SCLK 12
-#define TFT_CS 21
-#define TFT_DC 8
+#define TFT_CS 37        // FIXED: was 21 (conflict with BUZZER_PIN)
+#define TFT_DC 19        // FIXED: was 8 (conflict with I2C_SDA)
 #define TFT_RST -1
-#define TOUCH_CS 9
+#define TOUCH_CS 16      // FIXED: was 9 (conflict with I2C_SCL)
 
 // ============= GPIO =============
 #define BTN_UP 1
@@ -56,8 +56,8 @@
 // SX1262 868MHz (LoRa)
 #define SX1262_CS 5
 #define SX1262_RST 3
-#define SX1262_BUSY 2
-#define SX1262_DIO1 1
+#define SX1262_BUSY 44       // FIXED: was 2 (conflict with BTN_DOWN)
+#define SX1262_DIO1 43       // FIXED: was 1 (conflict with BTN_UP)
 
 // MFRC522 RFID
 #define MFRC522_CS 26

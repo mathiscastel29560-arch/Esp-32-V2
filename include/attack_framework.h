@@ -47,7 +47,10 @@ struct AttackResult {
   }
 
   ~AttackResult() {
-    if (data) free(data);
+    if (data) {
+      free(data);
+      data = nullptr;  // FIX: Prevent double-free
+    }
   }
 
   void setData(const uint8_t* src, uint16_t len) {
@@ -64,7 +67,7 @@ struct AttackResult {
 
 class Attack {
 public:
-  Attack(const char* name) : attackName(name), isRunning(false), currentStatus(AttackStatus::IDLE) {
+  Attack(const char* name) : attackName(name), isRunning(false), currentStatus(AttackStatus::IDLE), startTime(0) {
     memset(attackName, 0, 64);
     strncpy(attackName, name, 63);
   }
@@ -76,6 +79,7 @@ public:
   virtual bool start() {
     isRunning = true;
     currentStatus = AttackStatus::SCANNING;
+    startTime = millis();  // FIX: Initialize start time
     return true;
   }
   virtual bool stop() {
@@ -132,7 +136,8 @@ public:
     r->status = AttackStatus::SUCCESS;
     r->rssi = rssi;
     r->timestamp = millis();
-    strncpy(r->description, item, 127);
+    if (item) strncpy(r->description, item, 127);  // FIX: Null check
+    r->description[127] = '\0';  // Ensure null termination
     return r;
   }
 
@@ -142,7 +147,10 @@ public:
     r->status = AttackStatus::SUCCESS;
     r->timestamp = millis();
     r->setData(data, len);
-    if (desc) strncpy(r->description, desc, 127);
+    if (desc) {
+      strncpy(r->description, desc, 127);  // FIX: Null check
+      r->description[127] = '\0';  // Ensure null termination
+    }
     return r;
   }
 
@@ -151,7 +159,10 @@ public:
     r->type = ResultType::STATUS;
     r->status = status;
     r->timestamp = millis();
-    strncpy(r->description, msg, 127);
+    if (msg) {
+      strncpy(r->description, msg, 127);  // FIX: Null check
+      r->description[127] = '\0';  // Ensure null termination
+    }
     return r;
   }
 
@@ -160,7 +171,10 @@ public:
     r->type = ResultType::ERROR;
     r->status = AttackStatus::ERROR;
     r->timestamp = millis();
-    strncpy(r->description, error, 127);
+    if (error) {
+      strncpy(r->description, error, 127);  // FIX: Null check
+      r->description[127] = '\0';  // Ensure null termination
+    }
     return r;
   }
 };

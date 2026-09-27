@@ -5,7 +5,8 @@
 
 bool PacketSniffer::begin() {
   Logger::getInstance().info("Spy", "Interception paquets initialisée");
-  strcpy(filterProtocol, "ALL");
+  strncpy(filterProtocol, "ALL", sizeof(filterProtocol) - 1);  // FIX: Use strncpy
+  filterProtocol[sizeof(filterProtocol) - 1] = '\0';
   return true;
 }
 
@@ -197,7 +198,8 @@ bool SSLStripping::stop() {
 
 bool DNSSpoofing::begin() {
   Logger::getInstance().info("Spy", "Usurpation DNS initialisée");
-  strcpy(targetDomain, "example.com");
+  strncpy(targetDomain, "example.com", sizeof(targetDomain) - 1);  // FIX: Use strncpy
+  targetDomain[sizeof(targetDomain) - 1] = '\0';
   return true;
 }
 
@@ -250,7 +252,8 @@ bool DNSSpoofing::setParameter(const char* key, const char* value) {
 
 bool ARPSpoofing::begin() {
   Logger::getInstance().info("Spy", "Usurpation ARP initialisée");
-  strcpy(targetIP, "192.168.1.1");
+  strncpy(targetIP, "192.168.1.1", sizeof(targetIP) - 1);  // FIX: Use strncpy
+  targetIP[sizeof(targetIP) - 1] = '\0';
   return true;
 }
 
@@ -347,7 +350,8 @@ bool VulnerabilityScanner::stop() {
 
 bool BruteForceAttack::begin() {
   Logger::getInstance().info("Exploit", "Attaque brute force initialisée");
-  strcpy(targetService, "SSH");
+  strncpy(targetService, "SSH", sizeof(targetService) - 1);  // FIX: Use strncpy
+  targetService[sizeof(targetService) - 1] = '\0';
   return true;
 }
 

@@ -23,7 +23,9 @@ void setup() {
   Serial.print("[INIT] Display...");
   if (!Drivers::Display::begin()) {
     Serial.println(" FAILED!");
-    while (1);
+    Serial.println("[ERROR] Display initialization failed - system unstable!");
+    delay(2000);
+    ESP.restart();  // FIX: Attempt restart instead of hard freeze
   }
   Serial.println(" OK");
 
@@ -39,9 +41,11 @@ void setup() {
   Serial.print("[INIT] I2C Bus...");
   if (!Drivers::I2C::begin()) {
     Serial.println(" FAILED!");
-    while (1);
+    Serial.println("[ERROR] I2C bus initialization failed - RTC/NFC may not work!");
+    // I2C not critical - continue with warning
+  } else {
+    Serial.println(" OK");
   }
-  Serial.println(" OK");
 
   // Initialize RTC
   Serial.print("[INIT] RTC (DS3231)...");

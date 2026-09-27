@@ -316,11 +316,12 @@ void SmartHomeScanner::update() {
     devicesFound++;
     char deviceType[32];
     int type = devicesFound % 5;
-    if (type == 0) strcpy(deviceType, "Ampoule Smart");
-    else if (type == 1) strcpy(deviceType, "Thermostat");
-    else if (type == 2) strcpy(deviceType, "Serrure");
-    else if (type == 3) strcpy(deviceType, "Capteur");
-    else strcpy(deviceType, "Caméra");
+    if (type == 0) strncpy(deviceType, "Ampoule Smart", 31);  // FIX: Use strncpy
+    else if (type == 1) strncpy(deviceType, "Thermostat", 31);  // FIX: Use strncpy
+    else if (type == 2) strncpy(deviceType, "Serrure", 31);  // FIX: Use strncpy
+    else if (type == 3) strncpy(deviceType, "Capteur", 31);  // FIX: Use strncpy
+    else strncpy(deviceType, "Caméra", 31);  // FIX: Use strncpy
+    deviceType[31] = '\0';  // Ensure null termination
 
     AttackResult* result = ResultBuilder::createScan(deviceType, -55 - (devicesFound % 10));
     addResult(result);

@@ -384,7 +384,8 @@ void SystemInfo::update() {
 
 const char* SystemInfo::getDeviceMAC() {
   // TODO: Get actual MAC address
-  strcpy(deviceMAC, "AA:BB:CC:DD:EE:FF");
+  strncpy(deviceMAC, "AA:BB:CC:DD:EE:FF", sizeof(deviceMAC) - 1);  // FIX: Use strncpy
+  deviceMAC[sizeof(deviceMAC) - 1] = '\0';
   return deviceMAC;
 }
 

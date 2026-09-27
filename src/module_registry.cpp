@@ -302,17 +302,20 @@ uint16_t ModuleFactory::getAttacksByCategory(const char* category, const char** 
 
 bool ModuleValidator::validateModule(const ModuleInfo& info) {
   if (strlen(info.name) == 0) {
-    strcpy(lastError, "Module name is empty");
+    strncpy(lastError, "Module name is empty", 255);  // FIX: Use strncpy instead of strcpy
+    lastError[255] = '\0';
     return false;
   }
 
   if (strlen(info.version) == 0) {
-    strcpy(lastError, "Module version is empty");
+    strncpy(lastError, "Module version is empty", 255);  // FIX: Use strncpy instead of strcpy
+    lastError[255] = '\0';
     return false;
   }
 
   if (info.requiredMemory == 0) {
-    strcpy(lastError, "Module requires memory specification");
+    strncpy(lastError, "Module requires memory specification", 255);  // FIX: Use strncpy instead of strcpy
+    lastError[255] = '\0';
     return false;
   }
 
@@ -321,7 +324,8 @@ bool ModuleValidator::validateModule(const ModuleInfo& info) {
 
 bool ModuleValidator::validateMemory(const ModuleInfo& info) {
   if (info.requiredMemory > MAX_MEMORY) {
-    strcpy(lastError, "Module memory requirement exceeds max");
+    strncpy(lastError, "Module memory requirement exceeds max", 255);  // FIX: Use strncpy instead of strcpy
+    lastError[255] = '\0';
     return false;
   }
   return true;
