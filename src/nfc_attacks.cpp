@@ -101,6 +101,7 @@ bool MIFARECloner::stop() {
 bool MIFARECloner::setParameter(const char* key, const char* value) {
   if (strcmp(key, "uid") == 0) {
     strncpy(targetUID, value, 15);
+    targetUID[15] = '\0';
     return true;
   }
   return false;
@@ -287,6 +288,7 @@ bool MQTTInterceptor::stop() {
 bool MQTTInterceptor::setParameter(const char* key, const char* value) {
   if (strcmp(key, "broker") == 0) {
     strncpy(broker, value, 63);
+    broker[63] = '\0';
     return true;
   }
   return false;

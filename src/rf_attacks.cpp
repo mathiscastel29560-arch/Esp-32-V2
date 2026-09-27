@@ -308,6 +308,7 @@ bool IRSpoofer::stop() {
 bool IRSpoofer::setParameter(const char* key, const char* value) {
   if (strcmp(key, "device") == 0) {
     strncpy(deviceType, value, 31);
+    deviceType[31] = '\0';
     return true;
   }
   return false;

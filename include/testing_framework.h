@@ -192,6 +192,7 @@ public:
   static bool isInitialized() { return initialized; }
   static void simulateCardDetection(const char* cardUID) {
     strncpy(detectedCard, cardUID, 31);
+    detectedCard[31] = '\0';
     cardDetected = true;
   }
   static bool cardReady() { return cardDetected; }
@@ -301,6 +302,7 @@ public:
 
   void startMeasure(const char* benchName) {
     strncpy(currentBench, benchName, 63);
+    currentBench[63] = '\0';
     startTime = millis();
   }
 

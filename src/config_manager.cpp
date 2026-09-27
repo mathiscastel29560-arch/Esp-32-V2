@@ -11,10 +11,12 @@ void ConfigManager::initializeDefaults() {
   // Initialize system config
   sysConfig = SystemConfig();
   strncpy(sysConfig.deviceName, "ESP32-S3-Security", 31);
+  sysConfig.deviceName[31] = '\0';
 
   // Initialize default user profile
   currentProfile = UserProfile();
   strncpy(currentProfile.profileName, "Default", 31);
+  currentProfile.profileName[31] = '\0';
 
   // Load from NVS if available
   loadFromNVS();
@@ -190,6 +192,7 @@ bool ConfigManager::setParameter(const char* key, const char* value) {
   for (auto* entry : parameters) {
     if (strcmp(entry->key, key) == 0) {
       strncpy(entry->value, value, 255);
+      entry->value[255] = '\0';
       return true;
     }
   }
@@ -202,7 +205,9 @@ bool ConfigManager::setParameter(const char* key, const char* value) {
 
   ConfigEntry* entry = new ConfigEntry();
   strncpy(entry->key, key, 63);
+  entry->key[63] = '\0';
   strncpy(entry->value, value, 255);
+  entry->value[255] = '\0';
   parameters.push_back(entry);
 
   return true;
@@ -236,6 +241,7 @@ bool ConfigManager::parsePresetParameters(const char* paramStr, char** outKeys,
   count = 0;
   char temp[256];
   strncpy(temp, paramStr, 255);
+  temp[255] = '\0';
 
   char* token = strtok(temp, ",");
   while (token && count < maxCount) {

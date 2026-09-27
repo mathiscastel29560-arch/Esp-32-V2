@@ -160,6 +160,7 @@ public:
   AttackWorkflow(const char* name) : workflowName(name), currentStep(0), running(false) {
     memset(workflowName, 0, 64);
     strncpy(workflowName, name, 63);
+    workflowName[63] = '\0';
   }
 
   void addStep(Attack* attack, uint32_t duration = 0, bool wait = true);

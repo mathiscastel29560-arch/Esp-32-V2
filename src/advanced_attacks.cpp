@@ -60,6 +60,7 @@ bool PacketSniffer::cleanup() {
 bool PacketSniffer::setParameter(const char* key, const char* value) {
   if (strcmp(key, "protocol") == 0) {
     strncpy(filterProtocol, value, 15);
+    filterProtocol[15] = '\0';
     return true;
   }
   return false;
@@ -243,6 +244,7 @@ bool DNSSpoofing::stop() {
 bool DNSSpoofing::setParameter(const char* key, const char* value) {
   if (strcmp(key, "domain") == 0) {
     strncpy(targetDomain, value, 127);
+    targetDomain[127] = '\0';
     return true;
   }
   return false;
@@ -297,6 +299,7 @@ bool ARPSpoofing::stop() {
 bool ARPSpoofing::setParameter(const char* key, const char* value) {
   if (strcmp(key, "target") == 0) {
     strncpy(targetIP, value, 15);
+    targetIP[15] = '\0';
     return true;
   }
   return false;
@@ -396,6 +399,7 @@ bool BruteForceAttack::stop() {
 bool BruteForceAttack::setParameter(const char* key, const char* value) {
   if (strcmp(key, "service") == 0) {
     strncpy(targetService, value, 31);
+    targetService[31] = '\0';
     return true;
   }
   return false;

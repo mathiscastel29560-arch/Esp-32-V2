@@ -128,6 +128,7 @@ bool WiFiDeauthAttack::stop() {
 bool WiFiDeauthAttack::setParameter(const char* key, const char* value) {
   if (strcmp(key, "bssid") == 0) {
     strncpy(targetBSSID, value, 17);
+    targetBSSID[17] = '\0';
     return true;
   }
   if (strcmp(key, "channel") == 0) {
@@ -325,6 +326,7 @@ bool WiFiEvilTwin::stop() {
 bool WiFiEvilTwin::setParameter(const char* key, const char* value) {
   if (strcmp(key, "ssid") == 0) {
     strncpy(ssid, value, 32);
+    ssid[32] = '\0';
     return true;
   }
   return false;

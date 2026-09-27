@@ -101,6 +101,7 @@ public:
   WiFiEvilTwin() : Attack("WiFi Evil Twin"), clientsConnected(0) {
     memset(ssid, 0, 33);
     strncpy(ssid, "FakeNetwork", 32);
+    ssid[32] = '\0';
   }
 
   bool begin() override;

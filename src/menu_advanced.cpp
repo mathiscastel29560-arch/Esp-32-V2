@@ -286,6 +286,7 @@ bool MenuAdvanced::confirmDialog(const char* message) {
 
 void MenuAdvanced::showStatusMessage(const char* msg, uint16_t durationMs) {
   strncpy(statusMessage, msg, 127);
+  statusMessage[127] = '\0';
   statusMessageTime = millis();
 
   if (durationMs > 0) {
@@ -359,6 +360,7 @@ bool Toast::visible = false;
 
 void Toast::show(const char* message, uint16_t durationMs, uint16_t color) {
   strncpy(Toast::message, message, 255);
+  Toast::message[255] = '\0';
   Toast::displayTime = millis();
   Toast::durationMs = durationMs;
   Toast::color = color;

@@ -14,7 +14,9 @@ void Logger::log(LogLevel level, const char* module, const char* msg) {
   entry->level = level;
   entry->timestamp = millis();
   strncpy(entry->module, module, 31);
+  entry->module[31] = '\0';
   strncpy(entry->message, msg, 255);
+  entry->message[255] = '\0';
   logs.push_back(entry);
 
   // Also print to serial with timestamps

@@ -117,6 +117,7 @@ void DataLogger::clearAllData() {
 
 bool FileLogger::begin(const char* sdCardPath) {
   strncpy(sdPath, sdCardPath, 63);
+  sdPath[63] = '\0';
   ready = true; // TODO: Implement actual SD card init
   Logger::getInstance().info("FileLogger", "Initialized");
   return true;
@@ -241,6 +242,7 @@ void RingBuffer::write(const char* message) {
   RingBufferEntry& entry = buffer[writePos];
   entry.timestamp = millis();
   strncpy(entry.message, message, 255);
+  entry.message[255] = '\0';
 
   writePos = (writePos + 1) % maxSize;
   if (writePos == readPos) {

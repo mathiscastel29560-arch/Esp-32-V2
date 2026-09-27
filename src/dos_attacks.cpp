@@ -152,6 +152,7 @@ bool SlowlorisAttack::stop() {
 bool SlowlorisAttack::setParameter(const char* key, const char* value) {
   if (strcmp(key, "server") == 0) {
     strncpy(targetServer, value, 63);
+    targetServer[63] = '\0';
     return true;
   }
   return false;

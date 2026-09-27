@@ -180,6 +180,7 @@ public:
                                      running(false) {
     memset(sequenceName, 0, 64);
     strncpy(sequenceName, name, 63);
+    sequenceName[63] = '\0';
   }
 
   void addStep(Attack* attack, uint32_t duration, AttackPriority priority = AttackPriority::NORMAL);

@@ -126,6 +126,7 @@ bool BLEDisconnectAttack::stop() {
 bool BLEDisconnectAttack::setParameter(const char* key, const char* value) {
   if (strcmp(key, "address") == 0) {
     strncpy(targetAddress, value, 17);
+    targetAddress[17] = '\0';
     return true;
   }
   if (strcmp(key, "duration") == 0) {
@@ -303,6 +304,7 @@ bool BLEPairingReplay::stop() {
 bool BLEPairingReplay::setParameter(const char* key, const char* value) {
   if (strcmp(key, "address") == 0) {
     strncpy(targetAddress, value, 17);
+    targetAddress[17] = '\0';
     return true;
   }
   return false;

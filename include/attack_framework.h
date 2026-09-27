@@ -70,6 +70,7 @@ public:
   Attack(const char* name) : attackName(name), isRunning(false), currentStatus(AttackStatus::IDLE), startTime(0) {
     memset(attackName, 0, 64);
     strncpy(attackName, name, 63);
+    attackName[63] = '\0';
   }
 
   virtual ~Attack() {}
