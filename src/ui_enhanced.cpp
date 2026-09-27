@@ -28,59 +28,131 @@ void UIEnhanced::displayAnimatedBootScreen() {
 }
 
 void UIEnhanced::displayTigerAnimation() {
-  // Frame 1: Head turn right
-  Serial.println("╔══════════════════════════════════════════════════════╗");
-  Serial.println("║                                                      ║");
-  Serial.println("║                    🐯 TIGER 🐯                      ║");
-  Serial.println("║                                                      ║");
-  Serial.println("║           Professional Audit Platform                ║");
-  Serial.println("║                                                      ║");
-  Serial.println("║            ESP32-S3 Security Toolkit                 ║");
-  Serial.println("║                                                      ║");
-  Serial.println("╚══════════════════════════════════════════════════════╝");
-  delay(300);
-  
+  // Animated tiger frames - progressive appearance
+
+  // Frame 1: Eyes open (looking right)
   Serial.println("\n");
-  Serial.println("  ╭─────────────────────────────────────────╮");
-  Serial.println("  │  ┌────────────────────────────────────┐ │");
-  Serial.println("  │  │  ███████████░░░░░░░░░░░░░░░░░░░  │ │");
-  Serial.println("  │  │  50% - System Initialization      │ │");
-  Serial.println("  │  └────────────────────────────────────┘ │");
-  Serial.println("  ╰─────────────────────────────────────────╯");
-  delay(400);
+  Serial.println("  ╔════════════════════════════════════════╗");
+  Serial.println("  ║                                        ║");
+  Serial.println("  ║          Tiger Audit Platform          ║");
+  Serial.println("  ║                                        ║");
+  delay(200);
+
+  // Frame 2: Head emerging
+  Serial.println("  ║        ╱────────╲                      ║");
+  Serial.println("  ║       │  ◉  ◉  │  ← Eyes on          ║");
+  Serial.println("  ║        ╲────────╱                      ║");
+  Serial.println("  ║                                        ║");
+  delay(300);
+
+  // Frame 3: Face appears (mouth open)
+  Serial.clear();
+  Serial.println("\n");
+  Serial.println("  ╔════════════════════════════════════════╗");
+  Serial.println("  ║                                        ║");
+  Serial.println("  ║          🐯 TIGER ROARING 🐯           ║");
+  Serial.println("  ║                                        ║");
+  Serial.println("  ║        ╱─────────────╲                 ║");
+  Serial.println("  ║       │ ◉  ∩  ∩  ◉  │  READY!         ║");
+  Serial.println("  ║       │ \\  ⌢  ⌢  /  │                 ║");
+  Serial.println("  ║        ╲─────────────╱                 ║");
+  Serial.println("  ║                                        ║");
+  delay(300);
+
+  // Frame 4: Whiskers and stripes
+  Serial.clear();
+  Serial.println("\n");
+  Serial.println("  ╔════════════════════════════════════════╗");
+  Serial.println("  ║                                        ║");
+  Serial.println("  ║      ⚡ TIGER SECURITY FRAMEWORK ⚡    ║");
+  Serial.println("  ║                                        ║");
+  Serial.println("  ║     ╭───⌬⌬⌬───────────⌬⌬⌬───╮        ║");
+  Serial.println("  ║     │ ◉◉      /  \\      ◉◉ │        ║");
+  Serial.println("  ║     │          ∧∧∧∧            │        ║");
+  Serial.println("  ║     ╰───⌬⌬⌬───────────⌬⌬⌬───╯        ║");
+  Serial.println("  ║                                        ║");
+  delay(300);
+
+  // Frame 5: Full tiger with power
+  Serial.clear();
+  Serial.println("\n");
+  Serial.println("  ╔════════════════════════════════════════╗");
+  Serial.println("  ║                                        ║");
+  Serial.println("  ║      🐯 TIGER AUDIT PLATFORM 🐯        ║");
+  Serial.println("  ║                                        ║");
+  Serial.println("  ║     ╭─⚡⚡ ◉◉ ⚡⚡─────────╮        ║");
+  Serial.println("  ║     │  │◉◉─╱─╲─◉◉│  ⚡       │        ║");
+  Serial.println("  ║     │  │   ∨∨∨∨   │  ROARING │        ║");
+  Serial.println("  ║     ╰─⚡⚡────────⚡⚡─────╯        ║");
+  Serial.println("  ║                                        ║");
+  Serial.println("  ║    Professional Security Penetration    ║");
+  Serial.println("  ║         ESP32-S3 Advanced Tools         ║");
+  Serial.println("  ║                                        ║");
+  delay(300);
+
+  // Frame 6: Loading indicator
+  Serial.println("  ╠════════════════════════════════════════╣");
+  Serial.println("  ║  ⚡ ◉◉ ⚡ System Initialization ⚡ ◉◉ ⚡ ║");
+  Serial.println("  ╚════════════════════════════════════════╝");
+  delay(200);
 }
 
 void UIEnhanced::displaySystemLoadingBar() {
-  Serial.println("\n  🔧 System Initialization:\n");
-  
+  Serial.println("\n  ⚡ Initializing Security Systems:\n");
+
   const char* stages[] = {
-    "█ Hardware Drivers",
-    "█ Radio Modules (RF/NRF/CC1101)",
-    "█ Security Systems",
-    "█ Database Sync",
-    "█ Menu System",
-    "█ Display Calibration"
+    "⚡ GPIO & Button Driver",
+    "⚡ I2C: RTC & NFC Reader",
+    "⚡ SPI: RF Modules (CC1101 + NRF24)",
+    "⚡ Wireless: WiFi & BLE Stack",
+    "⚡ Security Database & Signatures",
+    "⚡ Menu System & Display"
   };
-  
+
   for (int i = 0; i < 6; i++) {
     delay(150);
     Serial.printf("    ✓ %s\n", stages[i]);
   }
+
+  Serial.println("");
 }
 
 void UIEnhanced::displaySuccessAnimation() {
-  delay(300);
+  delay(400);
+  Serial.clear();
   Serial.println("\n");
-  Serial.println("  ╭─────────────────────────────────────────╮");
-  Serial.println("  │                                         │");
-  Serial.println("  │            ✨ SYSTEM READY ✨           │");
-  Serial.println("  │                                         │");
-  Serial.println("  │    🐯 Tiger Audit Platform Online 🐯    │");
-  Serial.println("  │                                         │");
-  Serial.println("  │      Press START to begin auditing      │");
-  Serial.println("  │                                         │");
-  Serial.println("  ╰─────────────────────────────────────────╯\n");
+
+  // Loading bar fills
+  Serial.println("  ┌──────────────────────────────────────┐");
+  Serial.println("  │ ████████░░░░░░░░░░░░░░░░░░░░░░░░░░ │  25%");
+  delay(100);
+  Serial.println("  │ ████████████████░░░░░░░░░░░░░░░░░░░ │  50%");
+  delay(100);
+  Serial.println("  │ ████████████████████████░░░░░░░░░░░ │  75%");
+  delay(100);
+  Serial.println("  │ ██████████████████████████████████░░ │  95%");
+  delay(100);
+  Serial.println("  │ ████████████████████████████████████ │ 100%");
+  Serial.println("  └──────────────────────────────────────┘");
+
   delay(500);
+
+  // Success screen
+  Serial.println("\n");
+  Serial.println("  ╔════════════════════════════════════════╗");
+  Serial.println("  ║                                        ║");
+  Serial.println("  ║          ✨ SYSTEM READY ✨            ║");
+  Serial.println("  ║                                        ║");
+  Serial.println("  ║  🐯 Tiger Roaring and Ready to Hunt 🐯 ║");
+  Serial.println("  ║                                        ║");
+  Serial.println("  ║  All Systems Online • Hardware Ready   ║");
+  Serial.println("  ║  RF Modules • Security Tools • Loaded  ║");
+  Serial.println("  ║                                        ║");
+  Serial.println("  ║    ⚡ Press START to begin auditing ⚡  ║");
+  Serial.println("  ║                                        ║");
+  Serial.println("  ╚════════════════════════════════════════╝\n");
+
+  delay(600);
 }
 
 // ============ STATUS BAR ============
