@@ -5,53 +5,83 @@
 #include <cstdint>
 
 // Final Flipper Tools - LoRa/Wireless & Cellular/LTE (5/5)
+// Ultimate professional network hacking and security testing framework
 class FlipperUltimate {
 public:
-  // ============ LORA/WIRELESS TOOLS ============
+  // Error codes for operations
+  enum ResultCode {
+    RESULT_SUCCESS = 0,
+    RESULT_ERROR_INVALID_PARAM = -1,
+    RESULT_ERROR_HARDWARE = -2,
+    RESULT_ERROR_TIMEOUT = -3,
+    RESULT_ERROR_NOT_FOUND = -4,
+    RESULT_ERROR_CONNECTION = -5,
+    RESULT_ERROR_MEMORY = -6,
+    RESULT_ERROR_SECURITY = -7,
+    RESULT_ERROR_UNKNOWN = -99
+  };
+
+  // === LORA/WIRELESS STRUCTURES ===
   struct LoRaDevice {
-    std::string deviceId;
-    int32_t rssi;              // Signal strength
-    int8_t snr;                // Signal to noise ratio
-    uint32_t frequency;
-    std::string spreadingFactor;
-    uint8_t bandwidth;         // kHz
-    uint32_t lastSeen;
-    bool isGateway;
+    std::string deviceId;        // Device identifier
+    int32_t rssi;                // Signal strength (dBm)
+    int8_t snr;                  // Signal to noise ratio (dB)
+    uint32_t frequency;          // Frequency in Hz
+    std::string spreadingFactor; // SF7-SF12
+    uint8_t bandwidth;           // Bandwidth in kHz
+    uint32_t lastSeen;           // Timestamp
+    bool isGateway;              // Is LoRaWAN gateway
+    std::string version;         // LoRa version
+
+    bool isValid() const {
+      return !deviceId.empty() && frequency > 0 && rssi > -200;
+    }
   };
 
   struct LoRaPacket {
-    uint8_t data[256];
-    uint16_t length;
-    int32_t rssi;
-    int8_t snr;
-    uint32_t timestamp;
-    std::string sourceId;
-    std::string destId;
-    bool isCrypted;
+    uint8_t data[256];           // Payload data
+    uint16_t length;             // Payload length
+    int32_t rssi;                // Received signal strength
+    int8_t snr;                  // Signal to noise ratio
+    uint32_t timestamp;          // Packet timestamp
+    std::string sourceId;        // Source device ID
+    std::string destId;          // Destination device ID
+    bool isCrypted;              // Encrypted payload
+    uint16_t crc;                // CRC checksum
+
+    bool isValid() const {
+      return length > 0 && length <= 256;
+    }
   };
 
-  // ============ CELLULAR/LTE TOOLS ============
+  // === CELLULAR/LTE STRUCTURES ===
   struct CellularNetwork {
-    std::string mcc;           // Mobile Country Code
-    std::string mnc;           // Mobile Network Code
-    std::string operatorName;
-    uint32_t lac;              // Location Area Code
-    uint32_t cellId;
-    int32_t rsrp;              // Reference Signal Received Power
-    int32_t sinr;              // Signal to Interference + Noise Ratio
-    uint8_t bands[16];         // Active LTE bands
-    uint8_t bandCount;
-    std::string technology;    // 4G, 5G, LTE-M, NB-IoT
+    std::string mcc;             // Mobile Country Code (e.g., "310")
+    std::string mnc;             // Mobile Network Code (e.g., "410")
+    std::string operatorName;    // Operator name (e.g., "Verizon")
+    uint32_t lac;                // Location Area Code
+    uint32_t cellId;             // Cell ID
+    int32_t rsrp;                // Reference Signal Received Power (dBm)
+    int32_t sinr;                // Signal to Interference + Noise Ratio
+    uint8_t bands[16];           // Active LTE bands
+    uint8_t bandCount;           // Number of active bands
+    std::string technology;      // 4G, 5G, LTE-M, NB-IoT
+    bool isConnected;            // Currently connected
+
+    bool isValid() const {
+      return !mcc.empty() && !mnc.empty() && rsrp > -200;
+    }
   };
 
   struct CellularGateway {
-    std::string imsi;          // Subscriber identity
-    std::string imei;          // Device identity
-    std::string msin;          // Subscriber number
-    uint32_t tmsi;             // Temporary identity
-    std::string lac;           // Location Area Code
-    bool isLogged;
-    bool supportsFakeBS;       // Fake base station support
+    std::string imsi;            // International Mobile Subscriber Identity
+    std::string imei;            // International Mobile Equipment Identity
+    std::string msin;            // Mobile Subscriber Identification Number
+    uint32_t tmsi;               // Temporary Mobile Subscriber Identity
+    std::string lac;             // Location Area Code
+    bool isLogged;               // Logged into network
+    bool supportsFakeBS;         // Supports fake base station
+    uint64_t connectionTime;     // Connection timestamp
   };
 
   // Singleton

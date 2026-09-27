@@ -4,64 +4,98 @@
 #include <vector>
 #include <cstdint>
 
-// Advanced Flipper Zero Tools - CAN Bus, Jamming, JTAG
+// Advanced Flipper Zero Tools - CAN Bus, Jamming, JTAG/SWD debugging
 class FlipperAdvanced {
 public:
-  enum AdvancedTool {
-    TOOL_CAN_BUS,         // CAN bus automotive tools
-    TOOL_JAMMING,         // WiFi/BLE jamming
-    TOOL_JTAG,            // JTAG/SWD debugging
+  // Error codes for operations
+  enum ResultCode {
+    RESULT_SUCCESS = 0,
+    RESULT_ERROR_INVALID_PARAM = -1,
+    RESULT_ERROR_HARDWARE = -2,
+    RESULT_ERROR_TIMEOUT = -3,
+    RESULT_ERROR_NOT_FOUND = -4,
+    RESULT_ERROR_NOT_CONNECTED = -5,
+    RESULT_ERROR_MEMORY = -6,
+    RESULT_ERROR_UNKNOWN = -99
   };
 
-  // ============ CAN BUS TOOLS ============
+  enum AdvancedTool {
+    TOOL_CAN_BUS,         // CAN bus automotive tools
+    TOOL_JAMMING,         // WiFi/BLE jamming and RF interference
+    TOOL_JTAG,            // JTAG/SWD hardware debugging interface
+  };
+
+  // === CAN BUS STRUCTURES ===
   struct CANMessage {
-    uint32_t id;
-    uint8_t dlc;  // Data Length Code
-    uint8_t data[8];
-    uint32_t timestamp;
-    bool isExtended;
-    bool isRemote;
+    uint32_t id;                 // CAN message ID (11-bit or 29-bit)
+    uint8_t dlc;                 // Data Length Code (0-8)
+    uint8_t data[8];             // Message payload
+    uint32_t timestamp;          // Capture timestamp
+    bool isExtended;             // Extended ID format (29-bit)
+    bool isRemote;               // Remote transmission request
+    uint8_t errorFlags;          // Error flags if any
+
+    bool isValid() const {
+      return dlc <= 8 && (id <= (isExtended ? 0x1FFFFFFF : 0x7FF));
+    }
   };
 
   struct CANBusStats {
-    uint32_t messagesReceived;
-    uint32_t messagesSent;
-    uint32_t errorsDetected;
-    uint32_t bitsPerSecond;
-    float cpuLoad;
+    uint32_t messagesReceived;   // Total messages captured
+    uint32_t messagesSent;       // Total messages sent
+    uint32_t errorsDetected;     // CAN bus errors
+    uint32_t bitsPerSecond;      // Baudrate
+    float cpuLoad;               // CPU usage percentage
+    uint64_t uptime;             // Uptime in milliseconds
   };
 
-  // ============ JAMMING TOOLS ============
+  // === JAMMING STRUCTURES ===
   struct JammingSignal {
-    std::string type;        // WiFi, BLE, RF
-    uint32_t frequency;
-    uint8_t power;          // 0-100%
-    bool isActive;
-    uint32_t durationMs;
+    std::string type;             // WiFi, BLE, RF, Cellular
+    uint32_t frequency;           // Frequency in Hz
+    uint8_t power;                // Power 0-100%
+    bool isActive;                // Currently jamming
+    uint32_t durationMs;          // Duration in milliseconds
+    std::string modulation;       // Modulation type
+
+    bool isValid() const {
+      return !type.empty() && frequency > 0 && power <= 100;
+    }
   };
 
   struct JammedDevice {
-    std::string address;
-    std::string type;
-    int rssiLoss;           // Signal loss in dB
-    uint32_t jammingTime;
+    std::string address;          // Device MAC/ID
+    std::string type;             // Device type (WiFi, BLE, etc.)
+    int rssiLoss;                 // Signal loss in dB
+    uint32_t jammingTime;         // Time jammed
+    bool isRecoverable;           // Can device recover
   };
 
-  // ============ JTAG/SWD TOOLS ============
+  // === JTAG/SWD STRUCTURES ===
   struct DebugDevice {
-    std::string name;
-    std::string manufacturer;
-    uint32_t deviceId;
-    std::string architecture;  // ARM, MIPS, etc.
-    bool isConnected;
+    std::string name;             // Device/chip name
+    std::string manufacturer;     // Manufacturer name
+    uint32_t deviceId;            // JTAG device ID
+    std::string architecture;     // ARM, MIPS, RISC-V, etc.
+    bool isConnected;             // Currently connected
+    uint8_t idcodeVersion;        // IDCODE version
+
+    bool isValid() const {
+      return !name.empty() && deviceId != 0;
+    }
   };
 
   struct MemoryRegion {
-    uint32_t startAddress;
-    uint32_t size;
-    std::string permissions;   // R, W, X
-    std::string type;          // Flash, RAM, etc.
-    bool isAccessible;
+    uint32_t startAddress;        // Start address
+    uint32_t size;                // Region size in bytes
+    std::string permissions;      // R, W, X permissions
+    std::string type;             // Flash, RAM, EEPROM, etc.
+    bool isAccessible;            // Can be accessed
+    bool isProtected;             // Write-protected
+
+    bool isValid() const {
+      return size > 0 && startAddress < 0xFFFFFFFF;
+    }
   };
 
   // Singleton
@@ -70,48 +104,49 @@ public:
     return instance;
   }
 
-  // ========== CAN BUS ==========
-  bool initCANBus(uint32_t baudrate = 500000);
-  void scanCANNetwork();
-  std::vector<CANMessage> captureCANMessages(uint32_t durationMs);
-  bool sendCANMessage(const CANMessage& msg);
-  bool floodCANBus(uint32_t messageId, uint8_t dataLength, uint32_t countMessages);
-  CANBusStats getCANStats() const;
-  void analyzeCANTraffic();
-  bool fuzzyCANMessages(uint32_t durationMs);  // Send random CAN messages
+  // === CAN BUS OPERATIONS ===
+  ResultCode initCANBus(uint32_t baudrate = 500000);
+  ResultCode scanCANNetwork();
+  ResultCode captureCANMessages(uint32_t durationMs, std::vector<CANMessage>& messages);
+  ResultCode sendCANMessage(const CANMessage& msg);
+  ResultCode floodCANBus(uint32_t messageId, uint8_t dataLength, uint32_t countMessages);
+  ResultCode getCANStats(CANBusStats& stats) const;
+  ResultCode analyzeCANTraffic();
+  ResultCode fuzzyCANMessages(uint32_t durationMs);
+  bool isCANBusInitialized() const;
 
-  // ========== JAMMING TOOLS ==========
-  bool startWiFiJamming(uint32_t power = 50);
-  bool startBLEJamming(uint32_t power = 50);
-  bool startRFJamming(uint32_t frequency, uint32_t power = 50);
-  bool stopJamming();
+  // === JAMMING OPERATIONS ===
+  ResultCode startWiFiJamming(uint32_t power = 50);
+  ResultCode startBLEJamming(uint32_t power = 50);
+  ResultCode startRFJamming(uint32_t frequency, uint32_t power = 50);
+  ResultCode stopJamming();
   bool isJammingActive() const;
-  std::vector<JammedDevice> getJammedDevices() const;
+  ResultCode getJammedDevices(std::vector<JammedDevice>& devices) const;
   float getJamEffectiveness() const;
-  void generateNoisePattern(const std::string& pattern);
+  ResultCode generateNoisePattern(const std::string& pattern);
 
-  // ========== JTAG/SWD TOOLS ==========
-  bool initJTAG(uint8_t tckPin, uint8_t tmsPin, uint8_t tdoPin, uint8_t tdiPin);
-  bool initSWD(uint8_t clockPin, uint8_t dataPin);
-  bool scanJTAGDevices();
-  std::vector<DebugDevice> getConnectedDevices() const;
-  bool connectToDevice(uint32_t deviceId);
-  std::vector<MemoryRegion> readMemoryMap();
-  std::vector<uint8_t> readMemory(uint32_t address, uint32_t size);
-  bool writeMemory(uint32_t address, const std::vector<uint8_t>& data);
-  bool eraseFlash(uint32_t startAddress, uint32_t size);
-  bool dumpFirmware(uint32_t startAddress, uint32_t size, const std::string& filepath);
-  std::string identifyChip();
-  bool setBreakpoint(uint32_t address);
-  bool stepDebugger();
-  bool runDebugger();
-  bool stopDebugger();
+  // === JTAG/SWD OPERATIONS ===
+  ResultCode initJTAG(uint8_t tckPin, uint8_t tmsPin, uint8_t tdoPin, uint8_t tdiPin);
+  ResultCode initSWD(uint8_t clockPin, uint8_t dataPin);
+  ResultCode scanJTAGDevices();
+  ResultCode getConnectedDevices(std::vector<DebugDevice>& devices) const;
+  ResultCode connectToDevice(uint32_t deviceId);
+  ResultCode readMemoryMap(std::vector<MemoryRegion>& regions);
+  ResultCode readMemory(uint32_t address, uint32_t size, std::vector<uint8_t>& data);
+  ResultCode writeMemory(uint32_t address, const std::vector<uint8_t>& data);
+  ResultCode eraseFlash(uint32_t startAddress, uint32_t size);
+  ResultCode dumpFirmware(uint32_t startAddress, uint32_t size, const std::string& filepath);
+  ResultCode identifyChip(std::string& chipName);
+  ResultCode setBreakpoint(uint32_t address);
+  ResultCode stepDebugger();
+  ResultCode runDebugger();
+  ResultCode stopDebugger();
 
-  // Status & Monitoring
+  // === STATUS & MONITORING ===
   bool isHealthy() const;
   std::string getStatus() const;
-  uint32_t getLastErrorCode() const;
-  std::string getLastError() const;
+  ResultCode getLastError() const;
+  std::string getLastErrorMessage() const;
 
 private:
   FlipperAdvanced() = default;
